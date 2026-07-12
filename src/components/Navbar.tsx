@@ -64,16 +64,21 @@ export default function Navbar({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
-            <div className="absolute top-full left-0 mt-1 w-64 frosted-card rounded-xl shadow-xl overflow-hidden opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-150 transform scale-95 group-hover/menu:scale-100 origin-top-left z-50">
+            <div className="absolute top-full left-0 mt-1.5 w-64 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800/80 rounded-xl shadow-xl shadow-gray-200/50 dark:shadow-black/40 overflow-hidden opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-150 transform scale-95 group-hover/menu:scale-100 origin-top-left z-50">
               <div className="p-2 grid grid-cols-1 gap-1">
                 {toolsList.map((t) => (
                   <button
                     key={t.type}
-                    onClick={() => setActiveTool(t.type)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2.5 transition-colors cursor-pointer ${
+                    onClick={() => {
+                      setActiveTool(t.type);
+                      if (!hasFiles) {
+                        onTriggerUpload();
+                      }
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-bold flex items-center space-x-2.5 transition-colors cursor-pointer ${
                       activeTool === t.type
-                        ? 'bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                        : 'hover:bg-white/40 dark:hover:bg-white/5 text-gray-700 dark:text-zinc-300'
+                        ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400'
+                        : 'hover:bg-gray-50 dark:hover:bg-zinc-800/60 text-gray-700 dark:text-zinc-200'
                     }`}
                   >
                     {t.icon}

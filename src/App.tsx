@@ -47,9 +47,13 @@ export default function App() {
   };
 
   const handleFilesSelected = (selectedFiles: FileList | File[]) => {
-    Array.from(selectedFiles).forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
+    const list = Array.from(selectedFiles).filter((file) => file.type.startsWith('image/'));
+    if (list.length === 0) return;
 
+    let processedCount = 0;
+    const addedFiles: PixelFile[] = [];
+
+    list.forEach((file) => {
       const id = Math.random().toString(36).substring(2, 9);
       const originalFormat = file.name.split('.').pop()?.toLowerCase() || 'png';
       const previewUrl = URL.createObjectURL(file);
@@ -82,13 +86,22 @@ export default function App() {
           aiLoading: false,
         };
 
-        setFiles((prev) => [...prev, newPixelFile]);
+        addedFiles.push(newPixelFile);
+        processedCount++;
+
+        if (processedCount === list.length) {
+          setFiles((prev) => {
+            const nextFiles = [...prev, ...addedFiles];
+            // Auto-open if it is the first uploaded file in a single file upload
+            if (prev.length === 0 && list.length === 1) {
+              setSelectedFile(addedFiles[0]);
+            }
+            return nextFiles;
+          });
+        }
       };
       img.src = previewUrl;
     });
-
-    // Automatically transition to the queue view
-    setActiveTool(null);
   };
 
   const handleRemoveFile = (id: string) => {
@@ -475,6 +488,8 @@ export default function App() {
                   setGlobalConfig={setGlobalConfig}
                   onUpdateFile={handleUpdateFile}
                   onClose={() => setSelectedFile(null)}
+                  activeTool={activeTool}
+                  setActiveTool={setActiveTool}
                 />
               ) : activeTool === 'pdf' ? (
                 /* SPECIAL PDF VIEW: Merging pages */

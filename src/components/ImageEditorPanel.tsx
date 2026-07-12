@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  X, Check, Sparkles, Undo, Redo, RefreshCw, Layers, Crop, RotateCw, Type as TypeIcon, Image as ImageIcon, Sliders, FileText, ArrowLeft, ArrowRight, Copy, CheckSquare, ZoomIn, ZoomOut, AlertCircle, Plus
+  X, Check, Sparkles, Undo, Redo, RefreshCw, Layers, Crop, RotateCw, Type as TypeIcon, Image as ImageIcon, Sliders, FileText, ArrowLeft, ArrowRight, Copy, CheckSquare, ZoomIn, ZoomOut, AlertCircle, Plus, Download
 } from 'lucide-react';
 import { PixelFile, ToolType, ToolConfig, ImageAdjustments, DEFAULT_ADJUSTMENTS, WatermarkOptions, DEFAULT_WATERMARK } from '../types';
 import { processPixelFile } from '../utils/imageProcessor';
@@ -12,6 +12,8 @@ interface ImageEditorPanelProps {
   setGlobalConfig: (config: ToolConfig) => void;
   onUpdateFile: (updated: PixelFile) => void;
   onClose: () => void;
+  activeTool?: ToolType | null;
+  setActiveTool?: (tool: ToolType | null) => void;
 }
 
 export default function ImageEditorPanel({
@@ -20,14 +22,32 @@ export default function ImageEditorPanel({
   setGlobalConfig,
   onUpdateFile,
   onClose,
+  activeTool,
+  setActiveTool,
 }: ImageEditorPanelProps) {
-  const [activeTab, setActiveTab] = useState<ToolType>('compress');
+  const [activeTab, setActiveTab] = useState<ToolType>(
+    (activeTool && activeTool !== 'pdf') ? activeTool : 'compress'
+  );
   const [compareSplit, setCompareSplit] = useState(50); // percentage for the slider split
   const [isComparing, setIsComparing] = useState(true);
   const [historyStack, setHistoryStack] = useState<ImageAdjustments[]>([file.adjustments]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(file.processedUrl || file.previewUrl);
+
+  // Sync with global activeTool (from navbar or elsewhere)
+  useEffect(() => {
+    if (activeTool && activeTool !== 'pdf' && activeTool !== activeTab) {
+      setActiveTab(activeTool);
+    }
+  }, [activeTool]);
+
+  const handleTabChange = (tabType: ToolType) => {
+    setActiveTab(tabType);
+    if (setActiveTool) {
+      setActiveTool(tabType);
+    }
+  };
 
   // AI states
   const [aiLoading, setAiLoading] = useState(false);
@@ -403,6 +423,20 @@ export default function ImageEditorPanel({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
+  const handleDownloadProcessed = () => {
+    const downloadUrl = localPreviewUrl || file.processedUrl;
+    if (!downloadUrl) return;
+    const format = file.processedFormat || globalConfig.convert.format || file.originalFormat || 'png';
+    const lastDotIdx = file.name.lastIndexOf('.');
+    const baseName = lastDotIdx !== -1 ? file.name.substring(0, lastDotIdx) : file.name;
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `${baseName}_edited.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start" id="editor-workspace">
       {/* Visual Workstation Area (Col-span 7) */}
@@ -438,6 +472,19 @@ export default function ImageEditorPanel({
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reset</span>
             </button>
+
+            {/* Download Image Button */}
+            {(localPreviewUrl || file.processedUrl) && (
+              <button
+                onClick={handleDownloadProcessed}
+                disabled={isProcessing}
+                className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer shadow-md shadow-emerald-500/10"
+                title="Download this edited image directly"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download</span>
+              </button>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -573,7 +620,7 @@ export default function ImageEditorPanel({
           ].map((tab) => (
             <button
               key={tab.type}
-              onClick={() => setActiveTab(tab.type as ToolType)}
+              onClick={() => handleTabChange(tab.type as ToolType)}
               className={`py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
                 activeTab === tab.type
                   ? 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 shadow-xs border border-gray-200/50 dark:border-zinc-700/50'
@@ -1326,6 +1373,31 @@ export default function ImageEditorPanel({
               )}
             </div>
           )}
+        </div>
+
+        {/* Sidebar Action Footer */}
+        <div className="p-4 border-t border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-950/40 flex items-center justify-between gap-3 shrink-0">
+          <div className="text-xs font-bold text-gray-500">
+            {isProcessing ? (
+              <span className="flex items-center space-x-1.5 text-blue-600 dark:text-blue-400">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Processing...</span>
+              </span>
+            ) : (
+              <span className="flex items-center space-x-1.5 text-emerald-600 dark:text-emerald-400">
+                <Check className="w-3.5 h-3.5" />
+                <span>Ready</span>
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleDownloadProcessed}
+            disabled={isProcessing || (!localPreviewUrl && !file.processedUrl)}
+            className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-lg shadow-blue-500/10 flex items-center justify-center space-x-1.5 transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Download Image</span>
+          </button>
         </div>
       </div>
     </div>
