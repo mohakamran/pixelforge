@@ -1,0 +1,6 @@
+{
+  "name": "PixelForge",
+  "description": "An AI-powered client-side image processing toolkit for quick compression, conversion, resizing, cropping, watermarking, filters, and PDF compilation entirely in the browser.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

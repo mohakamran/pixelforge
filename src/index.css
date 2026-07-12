@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+/* Frosted glass ambient background gradients */
+.frosted-glass-bg {
+  position: relative;
+  background-color: #fdfdfd;
+  background-image: 
+    radial-gradient(at 0% 0%, #f0f7ff 0%, transparent 55%), 
+    radial-gradient(at 100% 0%, #eef2ff 0%, transparent 55%), 
+    radial-gradient(at 100% 100%, #f5f3ff 0%, transparent 55%), 
+    radial-gradient(at 0% 100%, #f0fdfa 0%, transparent 55%);
+}
+
+.dark .frosted-glass-bg {
+  background-color: #09090b;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.15) 0%, transparent 55%), 
+    radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.6) 0%, transparent 55%), 
+    radial-gradient(at 100% 100%, rgba(88, 28, 135, 0.15) 0%, transparent 55%), 
+    radial-gradient(at 0% 100%, rgba(20, 184, 166, 0.08) 0%, transparent 55%);
+}
+
+/* Translucent glass card styling with adaptive borders and blur shadows */
+.frosted-card {
+  background-color: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(226, 232, 240, 0.65);
+  box-shadow: 0 8px 32px 0 rgba(148, 163, 184, 0.08);
+}
+
+.dark .frosted-card {
+  background-color: rgba(24, 24, 27, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(63, 63, 70, 0.45);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Frosted glass cards that expand on hover */
+.frosted-card-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.frosted-card-hover:hover {
+  background-color: rgba(255, 255, 255, 0.65);
+  border-color: rgba(147, 197, 253, 0.85);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.14);
+  transform: translateY(-2px);
+}
+
+.dark .frosted-card-hover:hover {
+  background-color: rgba(39, 39, 42, 0.6);
+  border-color: rgba(59, 130, 246, 0.45);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+/* Nav & Footer Blurs */
+.frosted-nav {
+  background-color: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.dark .frosted-nav {
+  background-color: rgba(9, 9, 11, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(63, 63, 70, 0.4);
+}
+
+.frosted-footer {
+  background-color: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.dark .frosted-footer {
+  background-color: rgba(9, 9, 11, 0.35);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(63, 63, 70, 0.4);
+}
